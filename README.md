@@ -1,17 +1,34 @@
-# meuapp
+Este documento serve como guia para manter nosso código organizado e seguro. Como estamos no processo de desenvolvimento, não trabalhamos diretamente na main:
 
-A new Flutter project.
+Como rodar o projeto
+Clone o repositório:
 
-## Getting Started
+Bash
+git clone [LINK_DO_SEU_REPOSITORIO]
+cd nome-do-projeto
+Configuração do Ambiente (Crucial):
+Nosso projeto utiliza uma chave de API do Mapbox (é necessário criar uma conta no mapbox para adiquirir a chave). Por segurança, eu não subi a chave para o GitHub.
 
-This project is a starting point for a Flutter application.
+Na pasta raiz, crie um arquivo chamado .env e copie o conteúdo abaixo para dentro dele (Substitua sua_chave_aqui pela sua própria chave obtida no Mapbox.):
+MAPBOX_ACCESS_TOKEN=sua_chave_aqui
 
-A few resources to get you started if this is your first Flutter project:
+Após isso, coloque o arquivo .env no gitignore para não ser publicado.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+
+Para evitar conflitos e não quebrar o código que já está funcionando, usamos o sistema de Branches.
+
+1. Para garantir que a branch está atualizada:
+Bash
+git checkout main
+git pull origin main
+
+2. Crie sua Branch
+Nunca suba código direto na main. Crie uma branch para a sua funcionalidade ou otimização(ex: login, mapas, design):
+
+Bash
+git checkout -b feature/nome-da-sua-tarefa
+(Exemplo: git checkout -b feature/login-usuario)
+
+Envie para o GitHub (registrando o committ) Vamos juntar as partes quando estiver tudo funcionando
