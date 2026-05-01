@@ -238,14 +238,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _startAddMarkerFlow(mp.Point point) async {
-    // 1. CHAMADA DO SERVIÇO (Aqui chamamos o que criamos no arquivo de serviço!)
-    // O 'await' é obrigatório porque o serviço precisa consultar o mapa
     String contextoDetectado = await MarkerValidationService.detectContext(
       mapboxMapController!,
       point,
     );
 
-    // 2. Cria o pino temporário (como você já fazia)
     final Uint8List imageData = await _loadAssetImage("acessivel");
     mp.PointAnnotationOptions tempOptions = mp.PointAnnotationOptions(
       geometry: point,
@@ -258,8 +255,6 @@ class _HomePageState extends State<HomePage> {
 
     if (!mounted) return;
 
-    // 3. PASSA O CONTEXTO PARA O MODAL
-    // Agora o modal sabe se clicamos em calçada, rota ou estabelecimento
     _openBottomSheetForMarker("acessivel", contextoDetectado);
   }
 
