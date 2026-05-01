@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class SearchBarCustom extends StatelessWidget {
   final TextEditingController controller;
-  final VoidCallback onSearch; // A "ponte" para avisar a HomePage
+  final VoidCallback onSearch;
   final Function(String) onChanged;
 
   const SearchBarCustom({
@@ -23,7 +23,7 @@ class SearchBarCustom extends StatelessWidget {
           hintText: "Buscar endereço...",
           suffixIcon: IconButton(
             icon: const Icon(Icons.search),
-            onPressed: onSearch, // Quando clicar, chama a função da HomePage
+            onPressed: onSearch,
           ),
         ),
       ),
