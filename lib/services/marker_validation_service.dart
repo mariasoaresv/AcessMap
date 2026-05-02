@@ -8,7 +8,6 @@ class MarkerValidationService {
     try {
       final screenCoord = await controller.pixelForCoordinate(point);
 
-      // Consulta o que tem embaixo do clique
       final features = await controller.queryRenderedFeatures(
         mp.RenderedQueryGeometry.fromScreenCoordinate(screenCoord),
         mp.RenderedQueryOptions(),
@@ -23,6 +22,7 @@ class MarkerValidationService {
         print(
           "Layer ID encontrado: $layerId",
         ); 
+        );
 
         if (layerId.contains('building') || layerId.contains('landuse'))
           return 'estabelecimento';
