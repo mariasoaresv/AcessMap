@@ -21,6 +21,7 @@ class MarkerValidationService {
         // ignore: avoid_print
         print(
           "Layer ID encontrado: $layerId",
+        ); 
         );
 
         if (layerId.contains('building') || layerId.contains('landuse'))
@@ -53,6 +54,7 @@ class MarkerValidationService {
     String expectedContext = getContextForCategory(category);
     return locationContext == expectedContext;
   }
+
 
   static String getErrorMessage(String category) {
     switch (category) {
