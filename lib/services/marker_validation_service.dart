@@ -1,3 +1,4 @@
+// ignore_for_file: curly_braces_in_flow_control_structures, avoid_print
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mp;
 
 class MarkerValidationService {
@@ -5,34 +6,59 @@ class MarkerValidationService {
     mp.MapboxMap controller,
     mp.Point point,
   ) async {
+    print(
+      "DEBUG: detectContext iniciado para: ${point.coordinates.lng}, ${point.coordinates.lat}",
+    );
+
     try {
       final screenCoord = await controller.pixelForCoordinate(point);
 
+      final rect = mp.ScreenBox(
+        min: mp.ScreenCoordinate(x: screenCoord.x - 3, y: screenCoord.y - 3),
+        max: mp.ScreenCoordinate(x: screenCoord.x + 3, y: screenCoord.y + 3),
+      );
+
       final features = await controller.queryRenderedFeatures(
-        mp.RenderedQueryGeometry.fromScreenCoordinate(screenCoord),
+        mp.RenderedQueryGeometry.fromScreenBox(rect),
         mp.RenderedQueryOptions(),
       );
 
       if (features.isNotEmpty) {
-        final String layerId =
-            // ignore: invalid_null_aware_operator
-            features.first?.queriedFeature?.sourceLayer ?? '';
+        final firstFeature = features.first?.queriedFeature;
+        String layerId = '';
 
-        // ignore: avoid_print
-        print("Layer ID encontrado: $layerId");
+        if (firstFeature?.sourceLayer != null) {
+          layerId = firstFeature!.sourceLayer!;
+        } else if (firstFeature?.feature != null) {
+          final dynamic layerData = firstFeature!.feature["layer"];
 
-        if (layerId.contains('building') || layerId.contains('landuse'))
+          if (layerData != null) {
+            layerId = (layerData is Map)
+                ? (layerData["id"]?.toString() ?? '')
+                : layerData.toString();
+          }
+        }
+
+        print("DEBUG: Camada identificada: '$layerId'");
+
+        if (layerId.contains('building') ||
+            layerId.contains('structure') ||
+            layerId.contains('landuse')) {
           return 'estabelecimento';
-        if (layerId.contains('road') || layerId.contains('street'))
+        }
+        if (layerId.contains('road') ||
+            layerId.contains('street') ||
+            layerId.contains('bridge') ||
+            layerId.contains('tunnel')) {
           return 'rota';
-        if (layerId.contains('sidewalk') || layerId.contains('path'))
-          return 'calcada';
+        }
+      } else {
+        print("DEBUG: Nenhuma feature encontrada no local do clique.");
       }
 
       return 'calcada';
     } catch (e) {
-      // ignore: avoid_print
-      print("Erro ao consultar mapa: $e");
+      print("ERRO no MarkerValidationService: $e");
       return 'calcada';
     }
   }
@@ -67,7 +93,7 @@ class MarkerValidationService {
       case 'ruim':
         return "Este marcador só pode ser colocado em rotas.";
       default:
-        return "Categoria inválida para este local.";
+        return "Local inválido para esta categoria.";
     }
   }
 }

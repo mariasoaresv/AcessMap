@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously, avoid_print
+
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mp;
 import 'package:image_picker/image_picker.dart';
+import 'package:meuapp/main.dart';
 import '../services/search_service.dart';
 import '../widgets/barra_pesquisa.dart';
 import '../services/marker_validation_service.dart';
@@ -201,11 +204,29 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(icon: const Icon(Icons.home_outlined), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () {}),
+            IconButton(
+              icon: const Icon(Icons.home_outlined),
+              onPressed: () {
+                {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MenuScreen(nomeUsuario: ''),
+                    ),
+                  );
+                }
+              },
+              color: Color.fromARGB(255, 55, 93, 151),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {},
+              color: Color.fromARGB(255, 55, 93, 151),
+            ),
             IconButton(
               icon: const Icon(Icons.help_outline),
               onPressed: _showHelp,
+              color: Color.fromARGB(255, 55, 93, 151),
             ),
           ],
         ),
@@ -243,19 +264,22 @@ class _HomePageState extends State<HomePage> {
       point,
     );
 
-    final Uint8List imageData = await _loadAssetImage("acessivel");
-    mp.PointAnnotationOptions tempOptions = mp.PointAnnotationOptions(
-      geometry: point,
-      image: imageData,
-      iconSize: 3.0,
-      iconAnchor: mp.IconAnchor.BOTTOM,
-      isDraggable: true,
+    String categoriaInicial = 'rampa';
+    final Uint8List imageData = await _loadAssetImage(categoriaInicial);
+
+    _tempAnnotation = await pointAnnotationManager?.create(
+      mp.PointAnnotationOptions(
+        geometry: point,
+        image: imageData,
+        iconSize: 3.0,
+        iconAnchor: mp.IconAnchor.BOTTOM,
+        isDraggable: true,
+      ),
     );
-    _tempAnnotation = await pointAnnotationManager?.create(tempOptions);
 
     if (!mounted) return;
 
-    _openBottomSheetForMarker("acessivel", contextoDetectado);
+    _openBottomSheetForMarker(categoriaInicial, contextoDetectado);
   }
 
   void _openBottomSheetForMarker(String initialKey, String contextoDetectado) {
@@ -302,7 +326,7 @@ class _HomePageState extends State<HomePage> {
                         image: newImg,
                         iconSize: 3.0,
                         iconAnchor: mp.IconAnchor.BOTTOM,
-                        isDraggable: true,
+                        isDraggable: false,
                       ),
                     );
                   }
@@ -330,8 +354,10 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      pointAnnotationManager?.delete(_tempAnnotation!);
-                      _tempAnnotation = null;
+                      if (_tempAnnotation != null) {
+                        pointAnnotationManager?.delete(_tempAnnotation!);
+                        _tempAnnotation = null;
+                      }
                       Navigator.pop(context);
                     },
                     child: const Text(
@@ -341,19 +367,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      String contexto =
-                          MarkerValidationService.getContextForCategory(
-                            selectedKey,
-                          );
                       bool sucesso = await _finalize(
                         selectedKey,
                         desc.text,
                         photo,
-                        contexto,
+                        contextoDetectado,
                       );
 
                       if (sucesso) {
-                        // ignore: use_build_context_synchronously
                         Navigator.pop(context);
                       }
                     },
@@ -398,8 +419,20 @@ class _HomePageState extends State<HomePage> {
     bool valido = MarkerValidationService.canPlaceMarker(key, contexto);
 
     if (!valido) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(MarkerValidationService.getErrorMessage(key))),
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text(
+            "Não é possível adicionar esse icone aqui, escolha outro!",
+          ),
+          content: Text(MarkerValidationService.getErrorMessage(key)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Entendido"),
+            ),
+          ],
+        ),
       );
       return false;
     }
@@ -412,6 +445,7 @@ class _HomePageState extends State<HomePage> {
       'desc': desc,
       'photo': photo.path,
     };
+
     await pointAnnotationManager?.update(_tempAnnotation!);
     _tempAnnotation = null;
     return true;
@@ -520,7 +554,7 @@ class _HomePageState extends State<HomePage> {
               _markersInfo.remove(annotation.id);
 
               if (!mounted) return;
-              // ignore: use_build_context_synchronously
+
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
@@ -535,7 +569,9 @@ class _HomePageState extends State<HomePage> {
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text("Ajuda"),
-      content: const Text("Segure o dedo no mapa para adicionar pontos."),
+      content: const Text(
+        "Segure o dedo no mapa no local desejado para adicionar um ponto. Na interface, selecione o tipo de ponto, coloque a descrição e uma imagem do local!",
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
